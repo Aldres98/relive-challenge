@@ -4,16 +4,22 @@ import axios from "axios";
 import { Player, Kit } from "../shared/sharedModels";
 
 async function getPlayersFromServer() {
-    const players = await axios.get<Player[]>("http://localhost:4000/players");
-    const positions = await axios.get<
+    
+    const bulkRequest = await axios.all<any>([
+        axios.get<Player[]>("http://localhost:4000/players"),
+        axios.get<
         Array<{ name: string; position: number }>
-    >("http://localhost:4000/positions");
+    >("http://localhost:4000/positions")
+    ]);
 
-    const playersWithScore = players.data.map(player => {
+    const players = bulkRequest[0];
+    const positions = bulkRequest[1]
+
+    const playersWithScore = players.data.map((player: Player) => {
         return {
             ...player,
             startPosition: positions.data.find(
-                position => position.name === player.name
+                (position: {name: string; position: number }) => position.name === player.name
             )!.position
         };
     });
@@ -38,7 +44,7 @@ async function renderToContainer() {
 
     const stage = new Stage(root, {
         maxPosition: 10000,
-        players: getSamplePlayers()
+        players: await getPlayersFromServer()
     });
 
     stage.moveCamera(0, 0);
