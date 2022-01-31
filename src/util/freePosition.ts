@@ -12,6 +12,14 @@ export type Point = {
 };
 
 function boxesCollide(box1: Box, box2: Box) {
+    let box1BottomRight = { x: box1.x + box1.width, y: box1.y - box1.height };
+    let box2BottomRight = { x: box2.x + box2.width, y: box2.y - box2.height };
+
+    if (box1.x > box2BottomRight.x || box2.x > box1BottomRight.x) return false;
+
+    if (box1BottomRight.y > box2.y || box2BottomRight.y > box1.y) return false;
+
+    return true;
     // Helper function to detect whether two boxes collide or not, you'll probably need this at some point
 }
 
@@ -24,6 +32,7 @@ function boxesCollide(box1: Box, box2: Box) {
  * @param boxToPlace A Box describing the width and height of the NameTag we want to place, and the ideal coordinates we want to place it closest to
  * @param boxes Other Boxes, with which the returned position-box cannot collide
  */
+
 export function getClosestFreePosition(
     insideContainer: Box,
     boxToPlace: Box,
@@ -33,6 +42,15 @@ export function getClosestFreePosition(
     // it at exactly the position requested. But this doesn't take into account any of the other boxes
     // Can you create a smarter layouting algorithm?
 
+    if (boxes.length > 0) {
+        boxes.forEach((box) => {
+            if (boxesCollide(boxToPlace, box)) {
+                boxToPlace.y += 100;
+                boxToPlace.x += 90;
+            }
+        });
+
+    }
     // You can add any methods to this file to complete the exercise (no need to modify any other files)
     return boxToPlace;
 }
