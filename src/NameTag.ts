@@ -6,8 +6,9 @@ import { Kit } from "../shared/sharedModels";
 
 type Props = {
     position: number;
-    onClick: (nameTag: NameTag) => void;
-    getFreePosition: (nameTag: NameTag, desiredPosition: Box) => Point;
+    onClick: any;
+    clickArgs: number;
+    getFreePosition: any;
 };
 
 export class NameTag extends PureWidget<Props, {}> {
@@ -26,7 +27,7 @@ export class NameTag extends PureWidget<Props, {}> {
         this.element.className = `name ${this.staticProps.kit}`;
         this.element.innerText = this.staticProps.name;
         this.element.addEventListener("click", () => {
-            this.props.onClick(this);
+            this.props.onClick(this, this.props.clickArgs);
         });
         container.appendChild(this.element);
     }
@@ -55,8 +56,7 @@ export class NameTag extends PureWidget<Props, {}> {
             width: this.element.offsetWidth + margin,
             height: this.element.offsetHeight + margin
         };
-
-        const pos = this.props.getFreePosition(this, desiredPosition);
+        const pos = this.props.getFreePosition(this, desiredPosition)();
         this.element.style.transform = this.element.style.webkitTransform = `translate(${pos.x}px, ${pos.y}px)`;
 
         this.box = {

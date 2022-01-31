@@ -31,6 +31,8 @@ export default class Stage extends PureWidget<{}, State> {
         super({
             bikePositions: []
         });
+        this.click = this.click.bind(this)
+        this.getPosition = this.getPosition.bind(this)
         this.element = document.createElement("div");
         this.element.className = "stage";
         this.element.innerHTML = `<div class="name-container"></div>
@@ -118,6 +120,31 @@ export default class Stage extends PureWidget<{}, State> {
         );
     }
 
+    public click(nameTag: NameTag, i: number) {
+        this.tweenBikePosition(i, this.state.bikePositions[i] + 5);
+    }
+
+    public getPosition(nameTag: NameTag, desiredPosition: Box){
+       return () => {
+            const otherBoxes = this.nameTags
+                .filter((tag: any) => tag != nameTag)
+                .map((tag: any) => tag.getBox())
+                .filter<Box>((box): box is Box => !!box);
+
+            const containerBox = {
+                x: 0,
+                y: 0,
+                width: this.nameContainer.offsetWidth,
+                height: this.nameContainer.offsetHeight
+            };
+            return getClosestFreePosition(
+                containerBox,
+                desiredPosition,
+                otherBoxes
+            );
+        }
+    }
+
     protected render() {
         this.bikes.forEach((bike, i) => {
             bike.renderWithProps({ position: this.state.bikePositions[i] });
@@ -126,28 +153,10 @@ export default class Stage extends PureWidget<{}, State> {
         this.nameTags.forEach((nameTag, i) => {
             nameTag.renderWithProps({
                 position: this.state.bikePositions[i],
-                onClick: (nameTag: NameTag) => {
-                    this.tweenBikePosition(i, this.state.bikePositions[i] + 5);
-                },
-                getFreePosition: (nameTag: NameTag, desiredPosition: Box) => {
-                    const otherBoxes = this.nameTags
-                        .filter(tag => tag != nameTag)
-                        .map(tag => tag.getBox())
-                        .filter<Box>((box): box is Box => !!box);
+                onClick: this.click,
+                clickArgs: i,
+                getFreePosition: this.getPosition,
 
-                    const containerBox = {
-                        x: 0,
-                        y: 0,
-                        width: this.nameContainer.offsetWidth,
-                        height: this.nameContainer.offsetHeight
-                    };
-
-                    return getClosestFreePosition(
-                        containerBox,
-                        desiredPosition,
-                        otherBoxes
-                    );
-                }
             });
         });
     }
